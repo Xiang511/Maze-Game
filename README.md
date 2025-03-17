@@ -28,10 +28,10 @@ This is a maze generation game using the depth first search algorithm.
       
 - [X] ```Return to Start``` 事件觸發後，角色殘影存留在原本位置上
 
+- [X] ```Enhanced Vision``` 和 ```Restricted_Vision``` 事件觸發後，只能由上下左右之有效移動才可以扣視野效果的次數
+
 - [ ] ```Record Mode``` 開啟時，在開啟 ```Fog Mode``` 會導致視野變為 ( 1x1 )
 
-- [ ] ```Enhanced Vision``` 和 ```Restricted_Vision``` 事件觸發後，只能由上下左右之有效移動才可以扣視野效果的次數
-      
 - [ ]  ```Enhanced Vision``` 事件觸發後，若短時間內觸發 ```Return to Start```事件，有機率導致玩家視野突破限制 ( 3x3 )
 
 - [ ] ```Wall Pass``` 事件觸發後，往地圖邊緣走有機率會使玩家走出地圖外 ( 導致遊戲無法進行 )

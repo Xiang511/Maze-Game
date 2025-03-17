@@ -713,22 +713,22 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     if (!canPassThroughWalls) {
       // 檢查是否可以移動到新座標，若不能則返回
       if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-      (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-      return;
+        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+        return;
       }
     } else {
       // 檢查玩家是否已經穿過牆壁
       if (player.hasPassedThroughWall) {
-      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-        return;
-      }
+        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+          return;
+        }
       } else {
-      // 標記玩家已經穿過牆壁
-      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-        player.hasPassedThroughWall = true;
-      }
+        // 標記玩家已經穿過牆壁
+        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+          player.hasPassedThroughWall = true;
+        }
       }
     }
 
@@ -966,7 +966,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               // 把玩家傳送到起點
               if (player) {
                 player.unbindKeyDown(); // Unbind old player controls
-                
+
               }
               // 清除整個畫布
               ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
@@ -1004,43 +1004,70 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
               if (document.getElementById("record-checkbox").checked == false) {
                 recordPath = false;
-              }else{
+              } else {
                 recordPath = true;
-              } 
+              }
 
-              isReplaying = false; 
+              isReplaying = false;
             }
 
 
 
             if (event.name === "Enhanced Vision" && fogEnabled) {
-
+              let previousCoords = { ...player.cellCoords };
               let keyPressCount = 0;
 
               function incrementKeyPressCount() {
-                keyPressCount++;
-                console.log("Key pressed " + keyPressCount + " times");
 
+                // // 檢查玩家是否移動到新位置
+                // console.log("previousCoords:", previousCoords);
+                // console.log("player.cellCoords:", player.cellCoords);
+                // 取的當前玩家位置
+                let currentPlayerPosition = player.getCellCoords();
+                // console.log(currentPlayerPosition);
+          
+                if (previousCoords.x !== currentPlayerPosition.x || previousCoords.y !== currentPlayerPosition.y) {
+                  keyPressCount++;
+                  // 更新 previousCoords 為當前玩家座標
+                  previousCoords = { ...currentPlayerPosition };
+                  console.log("keyPressCount:", keyPressCount);
+                }
                 if (keyPressCount <= 3) {
                   Enhanced_Vision();
                 } else {
                   default_action();
+                  window.removeEventListener("keydown", incrementKeyPressCount); // 移除事件監聽器
                 }
               }
               window.addEventListener("keydown", incrementKeyPressCount);
+              console.log("keyPressCount:", keyPressCount);
+
             } else if (event.name === "Restricted Vision" && fogEnabled) {
 
+              let previousCoords = { ...player.cellCoords };
               let keyPressCount = 0;
 
               function incrementKeyPressCount() {
-                keyPressCount++;
-                console.log("Key pressed " + keyPressCount + " times");
 
+                // // 檢查玩家是否移動到新位置
+                // console.log("previousCoords:", previousCoords);
+                // console.log("player.cellCoords:", player.cellCoords);
+                // 取的當前玩家位置
+                let currentPlayerPosition = player.getCellCoords();
+                // console.log(currentPlayerPosition);
+          
+                if (previousCoords.x !== currentPlayerPosition.x || previousCoords.y !== currentPlayerPosition.y) {
+                  keyPressCount++;
+                  // 更新 previousCoords 為當前玩家座標
+                  previousCoords = { ...currentPlayerPosition };
+                  console.log("keyPressCount:", keyPressCount);
+                }
                 if (keyPressCount <= 5) {
                   ChangePicture();
                   Restricted_Vision();
                 } else {
                   default_action();
+                  window.removeEventListener("keydown", incrementKeyPressCount); // 移除事件監聽器
                 }
               }
               window.addEventListener("keydown", incrementKeyPressCount);
