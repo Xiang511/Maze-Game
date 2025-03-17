@@ -1,7 +1,9 @@
+// 生成 0 到 max-1 之間的隨機整數
 function rand(max) {
   return Math.floor(Math.random() * max);
 }
 
+// 洗牌函數，用於隨機打亂數組
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -10,6 +12,7 @@ function shuffle(a) {
   return a;
 }
 
+// 調整圖片亮度的函數
 function changeBrightness(factor, sprite) {
   var virtCanvas = document.createElement("canvas");
   virtCanvas.width = 500;
@@ -20,9 +23,9 @@ function changeBrightness(factor, sprite) {
   var imgData = context.getImageData(0, 0, 500, 500);
 
   for (let i = 0; i < imgData.data.length; i += 4) {
-    imgData.data[i] = imgData.data[i] * factor;
-    imgData.data[i + 1] = imgData.data[i + 1] * factor;
-    imgData.data[i + 2] = imgData.data[i + 2] * factor;
+    imgData.data[i] = imgData.data[i] * factor; // 調整紅色通道
+    imgData.data[i + 1] = imgData.data[i + 1] * factor; // 調整綠色通道
+    imgData.data[i + 2] = imgData.data[i + 2] * factor; // 調整藍色通道
   }
   context.putImageData(imgData, 0, 0);
 
@@ -32,11 +35,13 @@ function changeBrightness(factor, sprite) {
   return spriteOutput;
 }
 
+// 顯示勝利訊息的函數
 function displayVictoryMess(moves) {
-  document.getElementById("moves").innerHTML = "You Moved " + moves + " Steps.";
-  toggleVisablity("Message-Container");
+  document.getElementById("moves").innerHTML = "You Moved " + moves + " Steps."; // 顯示玩家移動的步數
+  toggleVisablity("Message-Container"); // 切換訊息容器的可見性
 }
 
+// 切換元素可見性的函數
 function toggleVisablity(id) {
   let element = document.getElementById(id);
   element.style.display = "block";  // 讓它顯示
@@ -49,6 +54,7 @@ fogImage.src = "./fog.jpg";
 
 // this.visionRadius = 1; // 預設玩家視野範圍（對應 3×3，之後可修改, 0為1*1，2為5*5以此類推）
 
+// 迷宮生成函數
 function Maze(Width, Height) {
   var mazeMap;
   var width = Width;
@@ -88,6 +94,7 @@ function Maze(Width, Height) {
     return endCoord;
   };
 
+  // 生成迷宮地圖
   function genMap() {
     mazeMap = new Array(height);
     for (y = 0; y < height; y++) {
@@ -105,6 +112,7 @@ function Maze(Width, Height) {
     }
   }
 
+  // 定義迷宮結構
   function defineMaze() {
     var isComp = false;
     var move = false;
@@ -132,21 +140,21 @@ function Maze(Width, Height) {
         var ny = pos.y + modDir[direction].y;
 
         if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-          //Check if the tile is already visited
+          // 檢查該格子是否已被訪問
           if (!mazeMap[nx][ny].visited) {
-            //Carve through walls from this tile to next
+            // 從當前格子向下一格打通牆壁
             mazeMap[pos.x][pos.y][direction] = true;
             mazeMap[nx][ny][modDir[direction].o] = true;
 
-            //Set Currentcell as next cells Prior visited
+            // 設置當前格子為下一格的前一格
             mazeMap[nx][ny].priorPos = pos;
-            //Update Cell position to newly visited location
+            // 更新當前位置為新訪問的位置
             pos = {
               x: nx,
               y: ny
             };
             cellsVisited++;
-            //Recursively call this method on the next tile
+            // 遞迴調用此方法
             move = true;
             break;
           }
@@ -154,8 +162,7 @@ function Maze(Width, Height) {
       }
 
       if (!move) {
-        //  If it failed to find a direction,
-        //  move the current position back to the prior cell and Recall the method.
+        // 如果找不到方向，將當前位置移回前一格並重新調用此方法
         pos = mazeMap[pos.x][pos.y].priorPos;
       }
       if (numCells == cellsVisited) {
@@ -164,6 +171,7 @@ function Maze(Width, Height) {
     }
   }
 
+  // 定義起點和終點
   function defineStartEnd() {
     switch (rand(4)) {
       case 0:
@@ -214,12 +222,14 @@ function Maze(Width, Height) {
   defineMaze();
 }
 
+// 繪製迷宮的函數
 function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
   var map = Maze.map();
   var cellSize = cellsize;
   var drawEndMethod;
   ctx.lineWidth = cellSize / 40;
 
+  // 重新繪製迷宮
   this.redrawMaze = function (size) {
     cellSize = size;
     ctx.lineWidth = cellSize / 50;
@@ -229,6 +239,7 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
   this.drawEndMethod = drawEndSprite;
   this.eventPositions = [];  // 存放事件位置
 
+  // 繪製事件
   this.drawEvents = function (numEvents, eventImage) {
 
     // 先清除畫布上的舊事件
@@ -262,35 +273,35 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
 
     console.log("🎲 事件位置: ", this.eventPositions);
 
-    // 🔹 **重新畫出玩家起始位置**
+    // 重新畫出玩家起始位置
     if (player) {
       player.redrawPlayer(cellSize);
       this.drawEndMethod();
     }
   };
 
-  // 🔹 **迷霧模式**
+  // 迷霧模式
   this.applyFog = function () {
-    if (!player) return; // 🛑 確保 player 存在
+    if (!player) return; // 確保 player 存在
 
     let endCoord = Maze.endCoord(); // 取得終點座標
 
-    // 🛑 **先清除終點的迷霧**
+    // 先清除終點的迷霧
     ctx.clearRect(endCoord.x * cellSize, endCoord.y * cellSize, cellSize, cellSize);
 
     for (let x = 0; x < map.length; x++) {
       for (let y = 0; y < map[x].length; y++) {
-        // 🛑 **確保終點 & 起點不被迷霧覆蓋**
+        // 確保終點 & 起點不被迷霧覆蓋
         if (!player.isInPlayerVision(x, y) && !(x === endCoord.x && y === endCoord.y)) {
           ctx.drawImage(fogImage, x * cellSize, y * cellSize, cellSize, cellSize);
         }
       }
     }
 
-    // 🔹 **重新畫終點**
+    // 重新畫終點
     this.drawEndMethod();
 
-    // 🔹 **重新畫玩家**
+    // 重新畫玩家
     if (player) {
       player.redrawPlayer(cellSize);
     }
@@ -300,14 +311,13 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
   this.clearFog = function () {
     console.log("🔍 清除迷霧並重繪迷宮");
 
-    // 🔹 清空整個畫布
+    // 清空整個畫布
     ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
 
-    // 🔹 重新繪製迷宮
+    // 重新繪製迷宮
     draw.redrawMaze(cellSize);
 
-    // 🔹 **重新繪製事件**
-    // 🔹 **重新繪製事件 (使用原本的位置)**
+    // 重新繪製事件
     if (draw.eventPositions.length > 0) {
       let diceImg = new Image();
       diceImg.src = "./dice.png";
@@ -319,13 +329,13 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
       };
     }
 
-    // 🔹 **確保玩家仍然可見**
+    // 確保玩家仍然可見
     if (player) {
       player.redrawPlayer(cellSize);
     }
   };
 
-
+  // 繪製單個格子
   function drawCell(xCord, yCord, cell) {
     var x = xCord * cellSize;
     var y = yCord * cellSize;
@@ -356,6 +366,7 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
     }
   }
 
+  // 繪製迷宮地圖
   function drawMap() {
     for (x = 0; x < map.length; x++) {
       for (y = 0; y < map[x].length; y++) {
@@ -364,6 +375,7 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
     }
   }
 
+  // 繪製終點旗幟
   function drawEndFlag() {
     var coord = Maze.endCoord();
     var gridSize = 4;
@@ -392,6 +404,7 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
     }
   }
 
+  // 繪製終點圖片
   function drawEndSprite() {
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
@@ -409,31 +422,28 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
     );
   }
 
+  // 清除畫布
   function clear() {
     var canvasSize = cellSize * map.length;
     ctx.clearRect(0, 0, canvasSize, canvasSize);
   }
 
-  // if (endSprite != null) {
-  //   drawEndMethod = drawEndSprite;
-  // } else {
-  //   drawEndMethod = drawEndFlag;
-  // }
   clear();
   drawMap();
   this.drawEndMethod();
 }
 
-var mazeCanvas = document.getElementById("mazeCanvas");
-var ctx = mazeCanvas.getContext("2d");
-var sprite;
-var finishSprite;
-var maze, draw, player;
-var cellSize;
-var difficulty;
+var mazeCanvas = document.getElementById("mazeCanvas"); // 取得迷宮畫布元素
+var ctx = mazeCanvas.getContext("2d"); // 取得畫布的 2D 繪圖上下文
+var sprite; // 玩家角色圖片
+var finishSprite; // 終點圖片
+var maze, draw, player; // 迷宮、繪圖和玩家物件
+var cellSize; // 每個格子的大小
+var difficulty; // 迷宮難度
 // sprite.src = 'media/sprite.png';
 
 window.onload = function () {
+  // 設定畫布的寬度和高度
   let viewWidth = $("#view").width();
   let viewHeight = $("#view").height();
   if (viewHeight < viewWidth) {
@@ -444,7 +454,7 @@ window.onload = function () {
     ctx.canvas.height = viewWidth - viewWidth / 100;
   }
 
-  //Load and edit sprites
+  // 加載並編輯精靈圖片
   var completeOne = false;
   var completeTwo = false;
   var isComplete = () => {
@@ -482,6 +492,7 @@ window.onload = function () {
 
 };
 
+// 當視窗大小改變時，重新調整畫布大小和迷宮格子大小
 window.onresize = function () {
   let viewWidth = $("#view").width();
   let viewHeight = $("#view").height();
@@ -494,24 +505,25 @@ window.onresize = function () {
   }
   cellSize = mazeCanvas.width / difficulty;
   if (player != null) {
-    draw.redrawMaze(cellSize);
-    player.redrawPlayer(cellSize);
+    draw.redrawMaze(cellSize); // 重新繪製迷宮
+    player.redrawPlayer(cellSize); // 重新繪製玩家
   }
 };
 
+// 生成迷宮的函數
 function makeMaze() {
   if (player != undefined) {
-    player.unbindKeyDown();
-    player = null;
+    player.unbindKeyDown(); // 解除玩家的鍵盤事件綁定
+    player = null; // 清空玩家物件
   }
-  var e = document.getElementById("diffSelect");
-  difficulty = e.options[e.selectedIndex].value;
-  cellSize = mazeCanvas.width / difficulty;
-  maze = new Maze(difficulty, difficulty);
-  draw = new DrawMaze(maze, ctx, cellSize, finishSprite);
-  player = new Player(maze, mazeCanvas, cellSize, displayVictoryMess, sprite);
+  var e = document.getElementById("diffSelect"); // 取得難度選擇元素
+  difficulty = e.options[e.selectedIndex].value; // 取得選擇的難度值
+  cellSize = mazeCanvas.width / difficulty; // 計算每個格子的大小
+  maze = new Maze(difficulty, difficulty); // 生成新的迷宮
+  draw = new DrawMaze(maze, ctx, cellSize, finishSprite); // 繪製迷宮
+  player = new Player(maze, mazeCanvas, cellSize, displayVictoryMess, sprite); // 初始化玩家
   if (document.getElementById("mazeContainer").style.opacity < "100") {
-    document.getElementById("mazeContainer").style.opacity = "100";
+    document.getElementById("mazeContainer").style.opacity = "100"; // 設定迷宮容器的透明度
   }
 }
 
@@ -528,10 +540,15 @@ var isReplaying = false; // 全域變數，標記是否正在進行回放
 
 
 function Player(maze, c, _cellsize, onComplete, sprite = null) {
+  // 取得畫布的 2D 繪圖上下文
   var ctx = c.getContext("2d");
+  // 記錄玩家移動的步數
   var moves = 0;
+  // 將當前 Player 物件賦值給 player 變數
   var player = this;
+  // 取得迷宮地圖
   var map = maze.map();
+  // 設定玩家的初始座標為迷宮的起點座標
   var cellCoords = {
     x: maze.startCoord().x,
     y: maze.startCoord().y
@@ -540,14 +557,15 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   this.cellCoords = cellCoords; // 🔹 提供方法來取得座標
   console.log("📌 player 初始化時的 cellCoords: ", this.cellCoords);
 
+  // 設定格子大小和半格大小
   var cellSize = _cellsize;
   var halfCellSize = cellSize / 2;
-  
   recordPath = false;  // 是否記錄
   var fixedRecordPoint = null; // **存放開啟記錄時的位置**
   var canPassThroughWalls = false; // 是否啟用穿牆模式
 
 
+  // 根據是否有提供精靈圖片來決定繪製方法
   var drawSprite = sprite ? drawSpriteImg : drawSpriteCircle;
 
   this.getCellCoords = function () {  // 🔹 提供方法來取得座標
@@ -556,9 +574,10 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
 
 
+  // 繪製圓形精靈的函數
   function drawSpriteCircle(coord) {
     ctx.beginPath();
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "yellow"; // 設定填充顏色為黃色
     ctx.arc(
       (coord.x + 1) * cellSize - halfCellSize,
       (coord.y + 1) * cellSize - halfCellSize,
@@ -568,12 +587,14 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     );
     ctx.fill();
 
+    // 如果玩家到達終點，顯示勝利訊息並解除鍵盤事件綁定
     if (coord.x === maze.endCoord().x && coord.y === maze.endCoord().y) {
       onComplete(moves);
       player.unbindKeyDown();
     }
   }
 
+  // 繪製圖片精靈的函數
   function drawSpriteImg(coord) {
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
@@ -588,12 +609,14 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       cellSize - offsetRight,
       cellSize - offsetRight
     );
+    // 如果玩家到達終點，顯示勝利訊息並解除鍵盤事件綁定
     if (coord.x === maze.endCoord().x && coord.y === maze.endCoord().y) {
       onComplete(moves);
       player.unbindKeyDown();
     }
   }
 
+  // 移除精靈圖片的函數
   this.removeSprite = function (coord) {
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
@@ -605,6 +628,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     );
   };
 
+  // 檢查指定座標是否在玩家視野範圍內的函數
   this.isInPlayerVision = function (x, y) {
     let px = player.cellCoords.x;
     let py = player.cellCoords.y;
@@ -613,6 +637,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   console.log("player:", player);
   // console.log("isInPlayerVision:", player.isInPlayerVision(cellCoords.x, cellCoords.y));
 
+  // 更新迷霧的函數
   this.updateFog = function (playerX, playerY) {
     if (!fogEnabled) return;
 
@@ -652,7 +677,6 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       }
     }
 
-
     // 🔹 **先清除終點的迷霧**
     ctx.clearRect(maze.endCoord().x * cellSize, maze.endCoord().y * cellSize, cellSize, cellSize);
 
@@ -677,6 +701,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     }
   }
 
+  // 檢查座標是否有效的函數
   function isValidCoord(x, y) {
     return x >= 0 && x < map.length && y >= 0 && y < map[0].length;
   }
@@ -686,30 +711,31 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
     var cell = map[cellCoords.x][cellCoords.y];
     if (!canPassThroughWalls) {
+      // 檢查是否可以移動到新座標，若不能則返回
+      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+      (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+      return;
+      }
+    } else {
+      // 檢查玩家是否已經穿過牆壁
+      if (player.hasPassedThroughWall) {
       if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
         (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
         return;
       }
-    } else {
-      // Check if the player has already passed through a wall
-      if (player.hasPassedThroughWall) {
-        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-          return;
-        }
       } else {
-        // Mark that the player has passed through a wall
-        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-          player.hasPassedThroughWall = true;
-        }
+      // 標記玩家已經穿過牆壁
+      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+        player.hasPassedThroughWall = true;
+      }
       }
     }
 
-    player.removeSprite(cellCoords);
-    cellCoords = newCoords;
-    drawSprite(cellCoords);
-    moves++;
+    player.removeSprite(cellCoords); // 移除當前座標的精靈圖片
+    cellCoords = newCoords; // 更新座標
+    drawSprite(cellCoords); // 繪製新座標的精靈圖片
+    moves++; // 增加移動步數
 
     player.updateFog(cellCoords.x, cellCoords.y); // 🔹 移動後更新迷霧
     // console.log("🚶 玩家移動: dx =", dx, "dy =", dy);
@@ -1058,36 +1084,41 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
   }
 
+  // 檢查按鍵事件的函數
   function check(e) {
     switch (e.keyCode) {
-      case 37: // Left (A)
+      case 37: // 左 (A)
       case 65:
         movePlayer(-1, 0);
         break;
-      case 38: // Up (W)
+      case 38: // 上 (W)
       case 87:
         movePlayer(0, -1);
         break;
-      case 39: // Right (D)
+      case 39: // 右 (D)
       case 68:
         movePlayer(1, 0);
         break;
-      case 40: // Down (S)
+      case 40: // 下 (S)
       case 83:
         movePlayer(0, 1);
         break;
     }
   }
 
+  // 綁定鍵盤事件的函數
   this.bindKeyDown = function () {
     window.addEventListener("keydown", check, false);
   };
 
+  // 解除鍵盤事件綁定的函數
   this.unbindKeyDown = function () {
     window.removeEventListener("keydown", check, false);
   };
 
+  // 繪製起點精靈圖片
   drawSprite(maze.startCoord());
+  // 綁定鍵盤事件
   this.bindKeyDown();
 
   /* 加入回放功能 */
@@ -1163,11 +1194,12 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
     step();
   };
+  // 重新繪製玩家的函數
   this.redrawPlayer = function (size) {
     cellSize = size;
     halfCellSize = cellSize / 2;
-    player.removeSprite(cellCoords); // 先清除旧的
-    drawSprite(cellCoords); // 再重新绘制
+    player.removeSprite(cellCoords); // 先清除舊的
+    drawSprite(cellCoords); // 再重新繪製
   };
 
 
