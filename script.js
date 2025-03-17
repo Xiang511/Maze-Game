@@ -459,7 +459,7 @@ window.onload = function () {
   var completeTwo = false;
   var isComplete = () => {
     if (completeOne === true && completeTwo === true) {
-      console.log("Runs");
+      // console.log("Runs");
       setTimeout(function () {
         makeMaze();
       }, 500);
@@ -474,7 +474,7 @@ window.onload = function () {
   sprite.onload = function () {
     sprite = changeBrightness(1.2, sprite);
     completeOne = true;
-    console.log(completeOne);
+    // console.log(completeOne);
     isComplete();
   };
 
@@ -486,7 +486,7 @@ window.onload = function () {
   finishSprite.onload = function () {
     finishSprite = changeBrightness(1.1, finishSprite);
     completeTwo = true;
-    console.log(completeTwo);
+    // console.log(completeTwo);
     isComplete();
   };
 
