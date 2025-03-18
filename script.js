@@ -1239,6 +1239,74 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     player.removeSprite(cellCoords); // 先清除舊的
     drawSprite(cellCoords); // 再重新繪製
   };
+  this.redrawPlayerFogMode = function (size) {
+
+    cellSize = size;
+    halfCellSize = cellSize / 2;
+    player.removeSprite(cellCoords); // 先清除舊的
+    drawSprite(cellCoords); // 再重新繪製
+    let px = cellCoords.x;
+    let py = cellCoords.y;
+    visionSize = 1; // 🔹 使用玩家的視野範圍
+    let startCoord = maze.startCoord(); // 🔹 取得起點座標
+    let endCoord = maze.endCoord();
+
+    // 🔹 **清除 `visionSize × visionSize` 的可視範圍內迷霧**
+    for (let dx = -visionSize; dx <= visionSize; dx++) {
+      for (let dy = -visionSize; dy <= visionSize; dy++) {
+        let nx = px + dx;
+        let ny = py + dy;
+        if (isValidCoord(nx, ny)) {
+          ctx.clearRect(nx * cellSize, ny * cellSize, cellSize, cellSize);
+    
+          // 🔹 如果該座標是牆壁，重新繪製牆壁
+          if (!map[nx][ny].n) {
+            ctx.beginPath();
+            ctx.moveTo(nx * cellSize, ny * cellSize);
+            ctx.lineTo((nx + 1) * cellSize, ny * cellSize);
+            ctx.stroke();
+          }
+          if (!map[nx][ny].s) {
+            ctx.beginPath();
+            ctx.moveTo(nx * cellSize, (ny + 1) * cellSize);
+            ctx.lineTo((nx + 1) * cellSize, (ny + 1) * cellSize);
+            ctx.stroke();
+          }
+          if (!map[nx][ny].w) {
+            ctx.beginPath();
+            ctx.moveTo(nx * cellSize, ny * cellSize);
+            ctx.lineTo(nx * cellSize, (ny + 1) * cellSize);
+            ctx.stroke();
+          }
+          if (!map[nx][ny].e) {
+            ctx.beginPath();
+            ctx.moveTo((nx + 1) * cellSize, ny * cellSize);
+            ctx.lineTo((nx + 1) * cellSize, (ny + 1) * cellSize);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+    // 🔹 **確保事件只有在 `visionSize × visionSize` 內才會顯示**
+    draw.eventPositions.forEach(pos => {
+      if ((pos.x >= px - visionSize && pos.x <= px + visionSize) &&
+        (pos.y >= py - visionSize && pos.y <= py + visionSize)) {
+        let eventImage = new Image();
+        eventImage.src = "./dice.png"; // 事件圖片
+        eventImage.onload = function () {
+          ctx.drawImage(eventImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
+        };
+      }
+    });
+
+    // 清除終點迷霧
+    ctx.clearRect(maze.endCoord().x * cellSize, maze.endCoord().y * cellSize, cellSize, cellSize);
+    // 顯示終點
+    draw.drawEndMethod();
+    // 繪製玩家圖片
+    drawSprite(cellCoords);
+  }
+  
 
 
   /* 設定記錄模式 */
@@ -1318,6 +1386,7 @@ document.getElementById("fog-checkbox").addEventListener("change", function () {
   fogEnabled = this.checked;
   if (fogEnabled && player) {
     draw.applyFog(); // 當勾選時，覆蓋整個迷宮
+    player.redrawPlayerFogMode(cellSize);
   } else {
     draw.clearFog(); // 取消勾選時，清除所有迷霧
   }
