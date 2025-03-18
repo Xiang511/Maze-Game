@@ -713,29 +713,35 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   function movePlayer(dx, dy) {
     var newCoords = { x: cellCoords.x + dx, y: cellCoords.y + dy };
 
+    // 檢查是否超出迷宮邊界
+    if (newCoords.x < 0 || newCoords.x >= map.length || newCoords.y < 0 || newCoords.y >= map[0].length) {
+      // console.log("🚫 無法穿越最外圍牆壁！");
+      return; // 阻止移動
+    }
+
     var cell = map[cellCoords.x][cellCoords.y];
     if (!canPassThroughWalls && !isReplaying) {
       // 檢查是否可以移動到新座標，若不能則返回
       if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-      (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-      return;
+        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+        return;
       }
     } else if (!isReplaying) {
       // 檢查玩家是否已經穿過牆壁
       if (player.hasPassedThroughWall) {
-      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-        return;
-      }
+        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+          return;
+        }
       } else {
-      // 標記玩家已經穿過牆壁
-      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-        player.hasPassedThroughWall = true;
-      }
+        // 標記玩家已經穿過牆壁
+        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+          player.hasPassedThroughWall = true;
+        }
       }
     }
-    
+
 
     player.removeSprite(cellCoords); // 移除當前座標的精靈圖片
     cellCoords = newCoords; // 更新座標
@@ -1030,7 +1036,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 // 取的當前玩家位置
                 let currentPlayerPosition = player.getCellCoords();
                 // console.log(currentPlayerPosition);
-          
+
                 if (previousCoords.x !== currentPlayerPosition.x || previousCoords.y !== currentPlayerPosition.y) {
                   keyPressCount++;
                   // 更新 previousCoords 為當前玩家座標
@@ -1060,7 +1066,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 // 取的當前玩家位置
                 let currentPlayerPosition = player.getCellCoords();
                 // console.log(currentPlayerPosition);
-          
+
                 if (previousCoords.x !== currentPlayerPosition.x || previousCoords.y !== currentPlayerPosition.y) {
                   keyPressCount++;
                   // 更新 previousCoords 為當前玩家座標
