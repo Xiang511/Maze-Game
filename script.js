@@ -710,27 +710,28 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     var newCoords = { x: cellCoords.x + dx, y: cellCoords.y + dy };
 
     var cell = map[cellCoords.x][cellCoords.y];
-    if (!canPassThroughWalls) {
+    if (!canPassThroughWalls && !isReplaying) {
       // 檢查是否可以移動到新座標，若不能則返回
+      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+      (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+      return;
+      }
+    } else if (!isReplaying) {
+      // 檢查玩家是否已經穿過牆壁
+      if (player.hasPassedThroughWall) {
       if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
         (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
         return;
       }
-    } else {
-      // 檢查玩家是否已經穿過牆壁
-      if (player.hasPassedThroughWall) {
-        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-          return;
-        }
       } else {
-        // 標記玩家已經穿過牆壁
-        if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
-          (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
-          player.hasPassedThroughWall = true;
-        }
+      // 標記玩家已經穿過牆壁
+      if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
+        (dy === -1 && !cell.n) || (dy === 1 && !cell.s)) {
+        player.hasPassedThroughWall = true;
+      }
       }
     }
+    
 
     player.removeSprite(cellCoords); // 移除當前座標的精靈圖片
     cellCoords = newCoords; // 更新座標
