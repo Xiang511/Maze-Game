@@ -510,6 +510,8 @@ window.onresize = function () {
   }
 };
 
+var pathHistory = [];  // 記錄路徑
+
 // 生成迷宮的函數
 function makeMaze() {
   if (player != undefined) {
@@ -525,9 +527,11 @@ function makeMaze() {
   if (document.getElementById("mazeContainer").style.opacity < "100") {
     document.getElementById("mazeContainer").style.opacity = "100"; // 設定迷宮容器的透明度
   }
+  pathHistory = []
+  document.getElementById("record-checkbox").checked = false;
 }
 
-var pathHistory = [];  // 記錄路徑
+
 
 document.getElementById("record-checkbox").addEventListener("change", function () {
   player.toggleRecord(this.checked);
