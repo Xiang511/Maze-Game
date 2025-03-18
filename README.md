@@ -34,11 +34,13 @@ This is a maze generation game using the depth first search algorithm.
 
 - [X] ``` MakeMaze``` 調用時，recode 紀錄不會清除
 
+- [X] ```Wall Pass``` 事件觸發後，往地圖邊緣走有機率會使玩家走出地圖外 ( 導致遊戲無法進行 )
+
 - [ ] ```Record Mode``` 開啟時，在開啟 ```Fog Mode``` 會導致視野變為 ( 1x1 )
 
 - [ ]  ```Enhanced Vision``` 事件觸發後，若短時間內觸發 ```Return to Start```事件，有機率導致玩家視野突破限制 ( 3x3 )
 
-- [ ] ```Wall Pass``` 事件觸發後，往地圖邊緣走有機率會使玩家走出地圖外 ( 導致遊戲無法進行 )
+
 
 - [ ] ```Return to Start``` 事件觸發後，會導致 Record 功能沒有作用 ( 暫存點消失 )
 
@@ -52,7 +54,7 @@ This is a maze generation game using the depth first search algorithm.
 
 - [X] ``` MakeMaze``` 調用時，recode 紀錄不會清除
       
-- [ ] ```Wall Pass``` 事件觸發後，往地圖邊緣走有機率會使玩家走出地圖外 ( 導致遊戲無法進行 )
+- [X] ```Wall Pass``` 事件觸發後，往地圖邊緣走有機率會使玩家走出地圖外 ( 導致遊戲無法進行 )
 
 
 
