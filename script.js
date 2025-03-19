@@ -602,7 +602,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
   // 繪製圖片精靈的函數
   function drawSpriteImg(coord) {
-    console.log("🖼️ 使用圖片繪製玩家到:", coord);
+    // console.log("🖼️ 使用圖片繪製玩家到:", coord);
     // 繪製圖片的程式碼
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
@@ -626,7 +626,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
   // 移除精靈圖片的函數
   this.removeSprite = function (coord) {
-    console.log("🧹 清除舊精靈位置:", coord);
+    // console.log("🧹 清除舊精靈位置:", coord);
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
     ctx.clearRect(
@@ -725,7 +725,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     }
 
     var cell = map[cellCoords.x][cellCoords.y];
-    console.log("🕹️ 呼叫 movePlayer() - 嘗試移動", { dx, dy }, "當前座標:", cellCoords);
+    // console.log("🕹️ 呼叫 movePlayer() - 嘗試移動", { dx, dy }, "當前座標:", cellCoords);
     if (!canPassThroughWalls && !isReplaying) {
       // 檢查是否可以移動到新座標，若不能則返回
       if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
@@ -747,14 +747,14 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
         }
       }
     }
-    console.log("🚶 玩家移動 - 方向:", { dx, dy }, "新座標:", newCoords);
+    // console.log("🚶 玩家移動 - 方向:", { dx, dy }, "新座標:", newCoords);
     
 
     player.removeSprite(cellCoords); // 移除當前座標的精靈圖片
     cellCoords = newCoords; // 更新座標
     drawSprite(cellCoords); // 繪製新座標的精靈圖片
 
-    console.log("✅ 更新座標: ", cellCoords); // 確認 cellCoords 是否真的改變
+    // console.log("✅ 更新座標: ", cellCoords); // 確認 cellCoords 是否真的改變
 
     // **強制刷新畫面，以防沒有更新**
     setTimeout(() => drawSprite(cellCoords), 0);
@@ -1208,27 +1208,27 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     drawSprite(cellCoords);
 
     let index = 0;
-    console.log("Replaying path is", pathHistory); //test where first record is while replaying
+    // console.log("Replaying path is", pathHistory); //test where first record is while replaying
     // ✅ 定義 `delay(ms)`，確保 `setTimeout` 被 Promise 解析
     function delay(ms) {
-      console.log(`⏳ 開始等待 ${ms}ms`);
+      // console.log(`⏳ 開始等待 ${ms}ms`);
       return new Promise(resolve => setTimeout(() => {
-      console.log(`✅ 延遲 ${ms}ms 完成`);
+      // console.log(`✅ 延遲 ${ms}ms 完成`);
       resolve();
     }, ms));
     }
 
     async function step() {
-      console.log(`🎬 開始回放，總步數: ${pathHistory.length}`);
+      // console.log(`🎬 開始回放，總步數: ${pathHistory.length}`);
       while (index < pathHistory.length) {
-        console.log(`🚀 目前步驟: ${index + 1}/${pathHistory.length}`);
+        // console.log(`🚀 目前步驟: ${index + 1}/${pathHistory.length}`);
         if (!isReplaying) {
           console.log("⏹️ 回放被手動中斷");
           return;
         }
 
         let direction = pathHistory[index];
-        console.log(`🕹️ 移動方向: ${direction}`);
+        // console.log(`🕹️ 移動方向: ${direction}`);
 
         movePlayer(
           direction === "left" ? -1 : direction === "right" ? 1 : 0,
@@ -1241,9 +1241,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
         }
 
         // index++;
-        console.log(`⏳ 等待 300ms`);
+        // console.log(`⏳ 等待 300ms`);
         await delay(300); // ✅ 改用 `await` 來讓 `setTimeout` 正確解析
-        console.log(`✅ 延遲完成，繼續下一步`);
+        // console.log(`✅ 延遲完成，繼續下一步`);
         index++;
       }
 
@@ -1338,7 +1338,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   this.toggleRecord = function (enable) {
     console.log(`🔄 設定記錄模式: ${enable}`);
     recordPath = enable;
-    console.log("📌 `toggleRecord()` 內 `recordPath` 狀態:", recordPath);
+    // console.log("📌 `toggleRecord()` 內 `recordPath` 狀態:", recordPath);
     console.log("pathHistory:", pathHistory); //test where first record is
     if (enable) {
       // if (!fixedRecordPoint) {
