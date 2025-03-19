@@ -38,11 +38,11 @@ This is a maze generation game using the depth first search algorithm.
 
 - [X] ```Record Mode``` 開啟時，在開啟 ```Fog Mode``` 會導致視野變為 ( 1x1 )
 
-- [ ]  ```Enhanced Vision``` 事件觸發後，若短時間內觸發 ```Return to Start```事件，有機率導致玩家視野突破限制 ( 3x3 )
+- [X]  ```Enhanced Vision``` 事件觸發後，若短時間內觸發 ```Return to Start```事件，有機率導致玩家視野突破限制 ( 3x3 )
 
-- [ ] ```Enhanced Vision``` 和 ```Restricted_Vision``` 事件觸發後，在 Record 模式下，視野應自動隨事件變動
+- [X] ```Enhanced Vision``` 和 ```Restricted_Vision``` 事件觸發後，在 Record 模式下，視野應自動隨事件變動
 
-- [ ] ```Return to Start``` 事件觸發後，會導致 Record 功能沒有作用 ( 暫存點消失 )
+- [X] ```Return to Start``` 事件觸發後，會導致 Record 功能沒有作用 ( 暫存點消失 )
 
 
 
