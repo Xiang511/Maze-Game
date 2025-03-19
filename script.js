@@ -1,3 +1,4 @@
+var record_btn = document.getElementById("record-checkbox");
 // 生成 0 到 max-1 之間的隨機整數
 function rand(max) {
   return Math.floor(Math.random() * max);
@@ -528,6 +529,7 @@ function makeMaze() {
     document.getElementById("mazeContainer").style.opacity = "100"; // 設定迷宮容器的透明度
   }
   pathHistory = []
+  record_btn.disabled = false;
   document.getElementById("record-checkbox").checked = false;
 }
 
@@ -536,6 +538,8 @@ function makeMaze() {
 document.getElementById("record-checkbox").addEventListener("change", function () {
   player.toggleRecord(this.checked);
   console.log("🔴 記錄移動路徑:", this.checked);
+  record_btn.disabled = true;
+
 });
 
 var recordPath = false;  // 全域變數，控制是否記錄移動路徑
@@ -567,6 +571,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   recordPath = false;  // 是否記錄
   var fixedRecordPoint = null; // **存放開啟記錄時的位置**
   var canPassThroughWalls = false; // 是否啟用穿牆模式
+  let wasRecording = [];
+  var clearplayer = []
+  
 
 
   // 根據是否有提供精靈圖片來決定繪製方法
@@ -580,7 +587,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
   // 繪製圓形精靈的函數
   function drawSpriteCircle(coord) {
-    console.log("⭕ 使用圓形繪製玩家到:", coord);
+    // console.log("⭕ 使用圓形繪製玩家到:", coord);
     // 繪製圓形的程式碼
     ctx.beginPath();
     ctx.fillStyle = "yellow"; // 設定填充顏色為黃色
@@ -625,16 +632,19 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   }
 
   // 移除精靈圖片的函數
+
   this.removeSprite = function (coord) {
     // console.log("🧹 清除舊精靈位置:", coord);
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
+    // 清除玩家當前位置的精靈圖片
     ctx.clearRect(
-      coord.x * cellSize + offsetLeft,
-      coord.y * cellSize + offsetLeft,
-      cellSize - offsetRight,
-      cellSize - offsetRight
+      coord.x * cellSize + offsetLeft, // 計算清除區域的左上角 X 座標
+      coord.y * cellSize + offsetLeft, // 計算清除區域的左上角 Y 座標
+      cellSize - offsetRight,          // 計算清除區域的寬度
+      cellSize - offsetRight           // 計算清除區域的高度
     );
+
   };
 
   // 檢查指定座標是否在玩家視野範圍內的函數
@@ -725,7 +735,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     }
 
     var cell = map[cellCoords.x][cellCoords.y];
-    // console.log("🕹️ 呼叫 movePlayer() - 嘗試移動", { dx, dy }, "當前座標:", cellCoords);
+    console.log("當前座標:", cellCoords);
     if (!canPassThroughWalls && !isReplaying) {
       // 檢查是否可以移動到新座標，若不能則返回
       if ((dx === -1 && !cell.w) || (dx === 1 && !cell.e) ||
@@ -748,7 +758,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       }
     }
     // console.log("🚶 玩家移動 - 方向:", { dx, dy }, "新座標:", newCoords);
-    
+
 
     player.removeSprite(cellCoords); // 移除當前座標的精靈圖片
     cellCoords = newCoords; // 更新座標
@@ -756,8 +766,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
     // console.log("✅ 更新座標: ", cellCoords); // 確認 cellCoords 是否真的改變
 
-    // **強制刷新畫面，以防沒有更新**
-    setTimeout(() => drawSprite(cellCoords), 0);
+    // // **強制刷新畫面，以防沒有更新**
+    // setTimeout(() => drawSprite(cellCoords), 0);
 
     moves++; // 增加移動步數
 
@@ -765,7 +775,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     // console.log("🚶 玩家移動: dx =", dx, "dy =", dy);
     // console.log("🎯 當前座標:", cellCoords);
     // console.log("📌 `movePlayer()` 內部的 `recordPath` 狀態:", recordPath);
-    
+
 
     // 記錄路徑
     if (recordPath && !isReplaying) {
@@ -986,44 +996,55 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
             }
 
             function Return_to_Start() {
-              console.log("🔄 觸發 Return to Start 事件！");
-              player.removeSprite(player.cellCoords);
-              // 把玩家傳送到起點
-              if (player) {
+              // console.log("🔄 觸發 Return to Start 事件！");
+              let fogCheckbox = document.getElementById("fog-checkbox")
+              if (fogCheckbox.checked) {
+                console.log("todo ");
+              } else {
+
                 player.unbindKeyDown(); // Unbind old player controls
 
-              }
-              // 清除整個畫布
-              ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
-              // 重新繪製迷宮
-              draw.redrawMaze(cellSize);
-              // 重新繪製事件
-              if (draw.eventPositions.length > 0) {
-                let diceImg = new Image();
-                diceImg.src = "./dice.png";
-                diceImg.onload = function () {
-                  draw.eventPositions.forEach(pos => {
-                    ctx.drawImage(diceImg, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
-                    // 在事件圖案上加上迷霧
-                    if (fogEnabled) {
-                      ctx.drawImage(fogImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
-                      //取得當前位置並加上迷霧
-                      player.updateFog(pos.x, pos.y);
+                // 清除整個畫布
+                ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+                // console.log("// 清空玩家物件");
+                // player = null;
+                // 重新繪製迷宮
+                draw.redrawMaze(cellSize);
 
-                    }
-                  });
-                };
+                // 重新繪製事件
+                if (draw.eventPositions.length > 0) {
+                  let diceImg = new Image();
+                  diceImg.src = "./dice.png";
+                  diceImg.onload = function () {
+                    draw.eventPositions.forEach(pos => {
+                      ctx.drawImage(diceImg, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
+                      // 在事件圖案上加上迷霧
+
+                    });
+                    console.log("以重繪骰子事件");
+                  };
+                }
               }
-              // 重新繪製迷霧
-              if (fogEnabled) {
-                draw.applyFog();
-              }
+              clearplayer=[];
+              clearplayer = player.getCellCoords();
+
+              console.log("🔄 觸發 Return to Start 事件！",clearplayer);
+
               player = new Player(maze, mazeCanvas, cellSize, displayVictoryMess, sprite); // Re-initialize player
+
+              console.log('上次紀錄點',clearplayer);
+
+
               player.cellCoords = { ...maze.startCoord() }; // **設定玩家為起點座標**
               moves = 0;
 
               pathHistory = [];
+              // wasRecording = [];
               console.log("🗑 清空路徑記錄:", pathHistory);
+
+
+
+
               // 關閉record樣式
               document.getElementById("record-checkbox").checked = false;
 
@@ -1098,6 +1119,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               window.addEventListener("keydown", incrementKeyPressCount);
             } else if (event.name === "Return to Start") {
               Return_to_Start();
+              clearplayer=[];
+              record_btn.disabled = false;
               // isReplaying = false;
               // recordPath = true;
               // fixedRecordPoint = { ...player.cellCoords };
@@ -1195,17 +1218,34 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
     console.log("🔄 回到記錄點，開始回播路徑...");
 
+    sprite.src = "./key2.png";
+
+    console.log("📌 玩家目前座標:", clearplayer);
+    
+    clearplayer = player.getCellCoords();
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(clearplayer.x * cellSize, clearplayer.y * cellSize, cellSize, cellSize);
+
+    console.log("清理目前座標圖片", clearplayer);
+
+
+
     // 🔹 **設置回放狀態**
     isReplaying = true;
 
     // **暫存記錄狀態，並關閉記錄**
-    let wasRecording = recordPath;
+    wasRecording = recordPath;
     recordPath = false;
 
     // **回到固定記錄點**
+
+    // 清除玩家當前位置的精靈圖片
     player.removeSprite(cellCoords);
+    // 將玩家座標重置為固定記錄點的座標
     cellCoords = { ...fixedRecordPoint };
-    drawSprite(cellCoords);
+    // // 在新的座標位置繪製玩家精靈圖片
+    // drawSprite(cellCoords);
 
     let index = 0;
     // console.log("Replaying path is", pathHistory); //test where first record is while replaying
@@ -1213,9 +1253,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     function delay(ms) {
       // console.log(`⏳ 開始等待 ${ms}ms`);
       return new Promise(resolve => setTimeout(() => {
-      // console.log(`✅ 延遲 ${ms}ms 完成`);
-      resolve();
-    }, ms));
+        // console.log(`✅ 延遲 ${ms}ms 完成`);
+        resolve();
+      }, ms));
     }
 
     async function step() {
@@ -1283,7 +1323,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
         let ny = py + dy;
         if (isValidCoord(nx, ny)) {
           ctx.clearRect(nx * cellSize, ny * cellSize, cellSize, cellSize);
-    
+
           // 🔹 如果該座標是牆壁，重新繪製牆壁
           if (!map[nx][ny].n) {
             ctx.beginPath();
@@ -1331,7 +1371,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     // 繪製玩家圖片
     drawSprite(cellCoords);
   }
-  
+
 
 
   /* 設定記錄模式 */
@@ -1339,7 +1379,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     console.log(`🔄 設定記錄模式: ${enable}`);
     recordPath = enable;
     // console.log("📌 `toggleRecord()` 內 `recordPath` 狀態:", recordPath);
-    console.log("pathHistory:", pathHistory); //test where first record is
+    // console.log("pathHistory:", pathHistory); //test where first record is
     if (enable) {
       // if (!fixedRecordPoint) {
       //   fixedRecordPoint = { ...player.cellCoords };  // **如果沒有記錄點，則設定當前位置**
