@@ -1,5 +1,28 @@
 [
-    
+    {
+        "id": 1,
+        "name": "Enhanced Vision",
+        "description": "Your vision expands by 2 tiles for the next 3 steps!",
+        "effect": "increase_vision",
+        "duration": 3,
+        "value": 2
+    },
+    {
+        "id": 2,
+        "name": "Restricted Vision",
+        "description": "Your vision is reduced to 1 tile for the next 5 steps!",
+        "effect": "reduce_vision",
+        "duration": 5,
+        "value": 1
+    },
+    {
+        "id": 3,
+        "name": "Wall Pass",
+        "description": "You can pass through one wall!",
+        "effect": "pass_through_wall",
+        "duration": 1,
+        "value": 1
+    },
     {
         "id": 4,
         "name": "Return to Start",
