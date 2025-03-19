@@ -1033,8 +1033,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                       ctx.drawImage(diceImg, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
                       // 在事件圖案上加上迷霧
 
-                    }
-                  });
+                    });
+                  };
                 };
               }
               // 重新繪製迷霧
