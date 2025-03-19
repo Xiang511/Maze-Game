@@ -576,7 +576,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   var canPassThroughWalls = false; // 是否啟用穿牆模式
   let wasRecording = [];
   var clearplayer = []
-
+  this.visionSize = 1; // 宣告玩家視野範圍
 
 
   // 根據是否有提供精靈圖片來決定繪製方法
@@ -660,7 +660,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   // console.log("isInPlayerVision:", player.isInPlayerVision(cellCoords.x, cellCoords.y));
 
   // 更新迷霧的函數
-  this.updateFog = function (playerX, playerY) {
+  this.updateFog = function () {
     if (!fogEnabled) return;
 
     // 1️⃣ 先清除整个画布，避免旧影像残留
@@ -669,13 +669,13 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     let px = cellCoords.x;
     let py = cellCoords.y;
     // let visionSize = 1; // 🔹 使用玩家的視野範圍
-    let visionSize = player.visionSize || 1; // **动态获取 `visionSize`**
+    // let visionSize = player.visionSize || 1; // **动态获取 `visionSize`**
     let startCoord = maze.startCoord(); // 🔹 取得起點座標
     let endCoord = maze.endCoord();
 
     // 🔹 **清除 `visionSize × visionSize` 的可視範圍內迷霧**
-    for (let dx = -visionSize; dx <= visionSize; dx++) {
-      for (let dy = -visionSize; dy <= visionSize; dy++) {
+    for (let dx = -player.visionSize; dx <= player.visionSize; dx++) {
+      for (let dy = -player.visionSize; dy <= player.visionSize; dy++) {
         let nx = px + dx;
         let ny = py + dy;
         if (isValidCoord(nx, ny)) {
@@ -694,8 +694,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     for (let x = 0; x < map.length; x++) {
       for (let y = 0; y < map[x].length; y++) {
         if (
-          !((x >= px - visionSize && x <= px + visionSize) &&
-            (y >= py - visionSize && y <= py + visionSize)) && // **視野外**
+          !((x >= px - player.visionSize && x <= px + player.visionSize) &&
+            (y >= py - player.visionSize && y <= py + player.visionSize)) && // **視野外**
           !(x === startCoord.x && y === startCoord.y) // **不是起點**
         ) {
           ctx.drawImage(fogImage, x * cellSize, y * cellSize, cellSize, cellSize);
@@ -708,8 +708,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
     // 🔹 **確保事件只有在 `visionSize × visionSize` 內才會顯示**
     draw.eventPositions.forEach(pos => {
-      if ((pos.x >= px - visionSize && pos.x <= px + visionSize) &&
-        (pos.y >= py - visionSize && pos.y <= py + visionSize)) {
+      if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) &&
+        (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
         let eventImage = new Image();
         eventImage.src = "./dice.png"; // 事件圖片
         eventImage.onload = function () {
@@ -792,10 +792,13 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       if (dy === -1) direction = "up";
       if (dy === 1) direction = "down";
 
-      let visionSize = player.visionSize || 1; // 视野大小默认值为 1
+      let visionSize = player.visionSize; // 视野大小默认值为 1
       pathHistory.push({ direction, visionSize });
       // pathHistory.push(direction); //origin
       console.log("記錄路徑:",pathHistory);
+      console.log("pathHistory[length-1]:",pathHistory[pathHistory.length-1]);
+      console.log("pathHistory[length-1].direction:",pathHistory[pathHistory.length-1].direction);
+      console.log("pathHistory[length-1].visionSize:",pathHistory[pathHistory.length-1].visionSize);
       // console.log(pathHistory.length);
       // console.log("目前路徑:", pathHistory.join(" → "));
       // console.log("📌 新增移動記錄:", direction);
@@ -859,7 +862,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               for (let x = 0; x < map.length; x++) {
                 for (let y = 0; y < map[x].length; y++) {
                   if (
-                    !((x >= px - 1 && x <= px + 1) && (y >= py - 1 && y <= py + 1)) && // 視野外
+                    !((x >= px - player.visionSize && x <= px + player.visionSize) && (y >= py - player.visionSize && y <= py + player.visionSize)) && // 視野外
                     !(x === startCoord.x && y === startCoord.y) // 不是起點
                   ) {
                     ctx.drawImage(fogImage, x * cellSize, y * cellSize, cellSize, cellSize);
@@ -871,7 +874,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
               // 🔹 **繪製視野內的事件**
               draw.eventPositions.forEach(pos => {
-                if ((pos.x >= px - 1 && pos.x <= px + 1) && (pos.y >= py - 1 && pos.y <= py + 1)) {
+                if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) && (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
                   let eventImage = new Image();
                   eventImage.src = "./dice.png"; // 假設事件圖片是 `dice.png`
                   eventImage.onload = function () {
@@ -924,7 +927,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               for (let x = 0; x < map.length; x++) {
                 for (let y = 0; y < map[x].length; y++) {
                   if (
-                    !((x >= px - 2 && x <= px + 2) && (y >= py - 2 && y <= py + 2)) && // 視野外
+                    !((x >= px - player.visionSize && x <= px + player.visionSize) && (y >= py - player.visionSize && y <= py + player.visionSize)) && // 視野外
                     !(x === startCoord.x && y === startCoord.y) // 不是起點
                   ) {
                     ctx.drawImage(fogImage, x * cellSize, y * cellSize, cellSize, cellSize);
@@ -935,7 +938,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
                 // 🔹 **繪製視野內的事件**
                 draw.eventPositions.forEach(pos => {
-                  if ((pos.x >= px - 2 && pos.x <= px + 2) && (pos.y >= py - 2 && pos.y <= py + 2)) {
+                  if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) && (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
                     let eventImage = new Image();
                     eventImage.src = "./dice.png"; // 假設事件圖片是 `dice.png`
                     eventImage.onload = function () {
@@ -1018,7 +1021,10 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
             function Return_to_Start() {
               console.log("🔄 觸發 Return to Start 事件！");
+              console.log("📌 玩家傳送前座標:", cellCoords);
               player.removeSprite(player.cellCoords);
+              cellCoords = { ...maze.startCoord() }; // **設定玩家為起點座標**
+              console.log("📌 玩家傳送後座標:", cellCoords);
               // 把玩家傳送到起點
               if (player) {
                 player.unbindKeyDown(); // Unbind old player controls
@@ -1038,7 +1044,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                     draw.eventPositions.forEach(pos => {
                       ctx.drawImage(diceImg, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
                       // 在事件圖案上加上迷霧
-
+                      player.updateFog(pos.x, pos.y);
                     });
                   };
                 };
@@ -1052,13 +1058,13 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
               // console.log("🔄 觸發 Return to Start 事件！", clearplayer);
 
-              player = new Player(maze, mazeCanvas, cellSize, displayVictoryMess, sprite); // Re-initialize player
+              // player = new Player(maze, mazeCanvas, cellSize, displayVictoryMess, sprite); // Re-initialize player
 
               // console.log('上次紀錄點', clearplayer);
 
               // clearplayer = [];
 
-              player.cellCoords = { ...maze.startCoord() }; // **設定玩家為起點座標**
+              // player.cellCoords = { ...maze.startCoord() }; // **設定玩家為起點座標**
               moves = 0;
 
               pathHistory = [];
@@ -1081,6 +1087,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 draw.applyFog();
               }
               isReplaying = false;
+              // 重新繪製玩家
+              drawSprite(cellCoords);
+              player.bindKeyDown(); // Re-bind new player controls
             }
 
 
@@ -1248,20 +1257,22 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       return;
     }
 
-    function getRecordEndPoint(startPoint, pathHistory) {
+    function getRecordEndPoint(startPoint, directions) {
       let endPoint = { ...startPoint }; // 複製起始位置
-      pathHistory.forEach(direction => {
+      directions.forEach(direction => {
         if (direction === "left") endPoint.x -= 1;
         if (direction === "right") endPoint.x += 1;
         if (direction === "up") endPoint.y -= 1;
         if (direction === "down") endPoint.y += 1;
       });
       return endPoint;
-    }
+    };
+
 
     // 使用範例
     let startPoint = fixedRecordPoint; // 記錄的起始點
-    let recordEndPoint = getRecordEndPoint(startPoint, pathHistory);
+    let directions = pathHistory.map(item => item.direction);
+    let recordEndPoint = getRecordEndPoint(startPoint, directions); // 記錄的終點
     console.log("📌 記錄的終點座標:", recordEndPoint);
 
 
@@ -1302,9 +1313,10 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
           console.log("⏹️ 回放被手動中斷");
           return;
         }
-
-        let direction = pathHistory[index];
-        console.log(`🕹️ 移動方向: ${direction}`);
+        console.log("REPLYING pathHistory[index]:",pathHistory[index]);
+        let { direction, visionSize } = pathHistory[index]; // **逐步读取方向**
+        player.visionSize = visionSize; // **动态调整视野大小**
+        console.log(`🎥 回放步驟: ${index + 1}/${pathHistory.length}, 方向: ${direction}, 視野大小: ${visionSize}`);
 
         movePlayer(
           direction === "left" ? -1 : direction === "right" ? 1 : 0,
@@ -1328,7 +1340,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       isReplaying = false; // 回放結束，恢復正常狀態
       recordPath = wasRecording;
       // console.log("📌 回放結束，恢復記錄模式狀態:", recordPath);
-
+      // if (fogEnabled) {
+      //   player.updateFog(cellCoords.x, cellCoords.y);
+      // }
     }
 
     step();
@@ -1348,13 +1362,13 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     drawSprite(cellCoords); // 再重新繪製
     let px = cellCoords.x;
     let py = cellCoords.y;
-    visionSize = 1; // 🔹 使用玩家的視野範圍
+    // visionSize = 1; // 🔹 使用玩家的視野範圍
     let startCoord = maze.startCoord(); // 🔹 取得起點座標
     let endCoord = maze.endCoord();
 
     // 🔹 **清除 `visionSize × visionSize` 的可視範圍內迷霧**
-    for (let dx = -visionSize; dx <= visionSize; dx++) {
-      for (let dy = -visionSize; dy <= visionSize; dy++) {
+    for (let dx = -player.visionSize; dx <= player.visionSize; dx++) {
+      for (let dy = -player.visionSize; dy <= player.visionSize; dy++) {
         let nx = px + dx;
         let ny = py + dy;
         if (isValidCoord(nx, ny)) {
@@ -1390,8 +1404,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     }
     // 🔹 **確保事件只有在 `visionSize × visionSize` 內才會顯示**
     draw.eventPositions.forEach(pos => {
-      if ((pos.x >= px - visionSize && pos.x <= px + visionSize) &&
-        (pos.y >= py - visionSize && pos.y <= py + visionSize)) {
+      if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) &&
+        (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
         let eventImage = new Image();
         eventImage.src = "./dice.png"; // 事件圖片
         eventImage.onload = function () {
