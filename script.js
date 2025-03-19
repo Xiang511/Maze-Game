@@ -1,4 +1,6 @@
 var record_btn = document.getElementById("record-checkbox");
+var eventPositions = [];
+var evenpos = [];
 // 生成 0 到 max-1 之間的隨機整數
 function rand(max) {
   return Math.floor(Math.random() * max);
@@ -270,8 +272,9 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
     // 在迷宮畫上事件 (骰子)
     this.eventPositions.forEach(pos => {
       ctx.drawImage(eventImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
+      return this.eventPositions;
     });
-
+    eventPositions = this.eventPositions;
     console.log("🎲 事件位置: ", this.eventPositions);
 
     // 重新畫出玩家起始位置
@@ -573,7 +576,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   var canPassThroughWalls = false; // 是否啟用穿牆模式
   let wasRecording = [];
   var clearplayer = []
-  
+
 
 
   // 根據是否有提供精靈圖片來決定繪製方法
@@ -798,6 +801,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     // 🔹 檢查是否踩到事件
     draw.eventPositions.forEach((pos, index) => {
       if (pos.x === cellCoords.x && pos.y === cellCoords.y) {
+
+        evenpos = player.getCellCoords()
+        console.log("📍 當前玩家座標:", evenpos);
         console.log("🎲 觸發事件！");
 
         // 隨機選擇一個事件
@@ -1025,15 +1031,16 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                   };
                 }
               }
-              clearplayer=[];
-              clearplayer = player.getCellCoords();
 
-              console.log("🔄 觸發 Return to Start 事件！",clearplayer);
+              // clearplayer = player.getCellCoords();
+
+              // console.log("🔄 觸發 Return to Start 事件！", clearplayer);
 
               player = new Player(maze, mazeCanvas, cellSize, displayVictoryMess, sprite); // Re-initialize player
 
-              console.log('上次紀錄點',clearplayer);
+              // console.log('上次紀錄點', clearplayer);
 
+              // clearplayer = [];
 
               player.cellCoords = { ...maze.startCoord() }; // **設定玩家為起點座標**
               moves = 0;
@@ -1119,7 +1126,6 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               window.addEventListener("keydown", incrementKeyPressCount);
             } else if (event.name === "Return to Start") {
               Return_to_Start();
-              clearplayer=[];
               record_btn.disabled = false;
               // isReplaying = false;
               // recordPath = true;
@@ -1216,19 +1222,67 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       return;
     }
 
+    function getRecordEndPoint(startPoint, pathHistory) {
+      let endPoint = { ...startPoint }; // 複製起始位置
+      pathHistory.forEach(direction => {
+        if (direction === "left") endPoint.x -= 1;
+        if (direction === "right") endPoint.x += 1;
+        if (direction === "up") endPoint.y -= 1;
+        if (direction === "down") endPoint.y += 1;
+      });
+      return endPoint;
+    }
+
+    // 使用範例
+    let startPoint = fixedRecordPoint; // 記錄的起始點
+    let recordEndPoint = getRecordEndPoint(startPoint, pathHistory);
+    console.log("📌 記錄的終點座標:", recordEndPoint);
+
+
     console.log("🔄 回到記錄點，開始回播路徑...");
 
-    sprite.src = "./key2.png";
-
     console.log("📌 玩家目前座標:", clearplayer);
-    
+
     clearplayer = player.getCellCoords();
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(clearplayer.x * cellSize, clearplayer.y * cellSize, cellSize, cellSize);
+    if (clearplayer == evenpos) console.log("ture");
 
+    // ctx.fillRect(clearplayer.x * cellSize, clearplayer.y * cellSize, cellSize, cellSize);
+    ctx.clearRect(clearplayer.x * cellSize, clearplayer.y * cellSize, cellSize, cellSize);
+    ctx.clearRect(recordEndPoint.x * cellSize, recordEndPoint.y * cellSize, cellSize, cellSize);
+
+    // 檢查並重繪牆的線條
+    let cell = map[clearplayer.x][clearplayer.y];
+    if (!cell.n) {
+      ctx.beginPath();
+      ctx.moveTo(clearplayer.x * cellSize, clearplayer.y * cellSize);
+      ctx.lineTo((clearplayer.x + 1) * cellSize, clearplayer.y * cellSize);
+      ctx.stroke();
+    }
+    if (!cell.s) {
+      ctx.beginPath();
+      ctx.moveTo(clearplayer.x * cellSize, (clearplayer.y + 1) * cellSize);
+      ctx.lineTo((clearplayer.x + 1) * cellSize, (clearplayer.y + 1) * cellSize);
+      ctx.stroke();
+    }
+    if (!cell.w) {
+      ctx.beginPath();
+      ctx.moveTo(clearplayer.x * cellSize, clearplayer.y * cellSize);
+      ctx.lineTo(clearplayer.x * cellSize, (clearplayer.y + 1) * cellSize);
+      ctx.stroke();
+    }
+    if (!cell.e) {
+      ctx.beginPath();
+      ctx.moveTo((clearplayer.x + 1) * cellSize, clearplayer.y * cellSize);
+      ctx.lineTo((clearplayer.x + 1) * cellSize, (clearplayer.y + 1) * cellSize);
+      ctx.stroke();
+    }
     console.log("清理目前座標圖片", clearplayer);
 
+
+
+
+    console.log(eventPositions);
 
 
     // 🔹 **設置回放狀態**
