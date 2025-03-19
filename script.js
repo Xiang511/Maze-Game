@@ -580,7 +580,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
   // 繪製圓形精靈的函數
   function drawSpriteCircle(coord) {
-    console.log("⭕ 使用圓形繪製玩家到:", coord);
+    // console.log("⭕ 使用圓形繪製玩家到:", coord);
     // 繪製圓形的程式碼
     ctx.beginPath();
     ctx.fillStyle = "yellow"; // 設定填充顏色為黃色
@@ -602,7 +602,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
   // 繪製圖片精靈的函數
   function drawSpriteImg(coord) {
-    console.log("🖼️ 使用圖片繪製玩家到:", coord);
+    // console.log("🖼️ 使用圖片繪製玩家到:", coord);
     // 繪製圖片的程式碼
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
@@ -626,7 +626,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
   // 移除精靈圖片的函數
   this.removeSprite = function (coord) {
-    console.log("🧹 清除舊精靈位置:", coord);
+    // console.log("🧹 清除舊精靈位置:", coord);
     var offsetLeft = cellSize / 50;
     var offsetRight = cellSize / 25;
     ctx.clearRect(
@@ -650,9 +650,13 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
   this.updateFog = function (playerX, playerY) {
     if (!fogEnabled) return;
 
+    // 1️⃣ 先清除整个画布，避免旧影像残留
+    ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+
     let px = cellCoords.x;
     let py = cellCoords.y;
-    let visionSize = 1; // 🔹 使用玩家的視野範圍
+    // let visionSize = 1; // 🔹 使用玩家的視野範圍
+    let visionSize = player.visionSize || 1; // **动态获取 `visionSize`**
     let startCoord = maze.startCoord(); // 🔹 取得起點座標
     let endCoord = maze.endCoord();
 
@@ -775,12 +779,18 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       if (dy === -1) direction = "up";
       if (dy === 1) direction = "down";
 
-      pathHistory.push(direction);
-      // console.log(pathHistory);
+      let visionSize = player.visionSize || 1; // 视野大小默认值为 1
+      pathHistory.push({ direction, visionSize });
+      // pathHistory.push(direction); //origin
+      console.log("記錄路徑:",pathHistory);
       // console.log(pathHistory.length);
       // console.log("目前路徑:", pathHistory.join(" → "));
       // console.log("📌 新增移動記錄:", direction);
       // console.log("📜 當前路徑記錄:", pathHistory);
+      // **更新迷雾**
+      if (fogEnabled) {
+        player.updateFog(cellCoords.x, cellCoords.y);
+      }
     } else {
       // console.log("⚠ `recordPath` 為", recordPath, " 或 `isReplaying` 為", isReplaying, "未記錄移動");
     }
@@ -798,9 +808,12 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
             console.log("🔹 事件名稱:", event.name);
             alert(`事件發生: ${event.name}\n${event.description}`);
 
+            
 
 
             function default_action() {
+              // player.visionSize = 1; // 正常視野大小
+              // console.log("👀 視野縮小！當前視野大小:", player.visionSize);
               let px = cellCoords.x;
               let py = cellCoords.y;
               let startCoord = maze.startCoord(); // 🔹 取得起點座標
@@ -864,7 +877,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
             function Enhanced_Vision() {
               // 第一個事件 Your vision expands by 2 tiles for the next 3 steps!
-
+              // player.visionSize = Math.max(2, player.visionSize+1) // **扩大视野**
+              // console.log("👀 視野擴大！當前視野大小:", player.visionSize);
               let px = cellCoords.x;
               let py = cellCoords.y;
               let startCoord = maze.startCoord(); // 🔹 取得起點座標
@@ -946,7 +960,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
             }
             function Restricted_Vision() {
               // 第二個事件 Your vision restricts by 1 tiles for the next 5 steps!
-
+              // player.visionSize = Math.max(0, player.visionSize - 1); // **缩小视野，但最小为 1**
+              // console.log("👀 視野縮小！當前視野大小:", player.visionSize);
               let px = cellCoords.x;
               let py = cellCoords.y;
               let startCoord = maze.startCoord(); // 🔹 取得起點座標
@@ -987,7 +1002,11 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
             function Return_to_Start() {
               console.log("🔄 觸發 Return to Start 事件！");
-              player.removeSprite(player.cellCoords);
+
+              // 1️⃣ 先清除所有可能的残影
+              // ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+
+              // player.removeSprite(player.cellCoords);
               // 把玩家傳送到起點
               if (player) {
                 player.unbindKeyDown(); // Unbind old player controls
@@ -1014,10 +1033,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                   });
                 };
               }
-              // 重新繪製迷霧
-              if (fogEnabled) {
-                draw.applyFog();
-              }
+              
               player = new Player(maze, mazeCanvas, cellSize, displayVictoryMess, sprite); // Re-initialize player
               player.cellCoords = { ...maze.startCoord() }; // **設定玩家為起點座標**
               moves = 0;
@@ -1032,7 +1048,10 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               } else {
                 recordPath = true;
               }
-
+              // 重新繪製迷霧
+              if (fogEnabled) {
+                draw.applyFog();
+              }
               isReplaying = false;
             }
 
@@ -1041,7 +1060,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
             if (event.name === "Enhanced Vision" && fogEnabled) {
               let previousCoords = { ...player.cellCoords };
               let keyPressCount = 0;
-
+              player.visionSize = 2; //expand vision
+              console.log("👀 視野放大！當前視野大小:", player.visionSize);
               function incrementKeyPressCount() {
 
                 // // 檢查玩家是否移動到新位置
@@ -1059,7 +1079,10 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 }
                 if (keyPressCount <= 3) {
                   Enhanced_Vision();
+
                 } else {
+                  player.visionSize = 1; // normal vision
+                  console.log("👀 視野正學！當前視野大小:", player.visionSize);
                   default_action();
                   window.removeEventListener("keydown", incrementKeyPressCount); // 移除事件監聽器
                 }
@@ -1071,7 +1094,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
               let previousCoords = { ...player.cellCoords };
               let keyPressCount = 0;
-
+              player.visionSize = 0; // **缩小视野，但最小为 0**
+              console.log("👀 視野縮小！當前視野大小:", player.visionSize);
               function incrementKeyPressCount() {
 
                 // // 檢查玩家是否移動到新位置
@@ -1091,6 +1115,8 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                   ChangePicture();
                   Restricted_Vision();
                 } else {
+                  player.visionSize = 1; // normal vision
+                  console.log("👀 視野正常！當前視野大小:", player.visionSize);
                   default_action();
                   window.removeEventListener("keydown", incrementKeyPressCount); // 移除事件監聽器
                 }
@@ -1195,6 +1221,38 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
     console.log("🔄 回到記錄點，開始回播路徑...");
 
+    // 1️⃣ 先清除玩家位置
+    // ctx.clearRect(player.cellCoords.x * cellSize, player.cellCoords.y * cellSize, cellSize, cellSize);
+    // 重新繪製迷宮
+    // draw.redrawMaze(cellSize);
+    // 🔹 **繪製視野內的事件**
+    // let px = cellCoords.x;
+    // let py = cellCoords.y;
+    // draw.eventPositions.forEach(pos => {
+    //   if ((pos.x >= px - 1 && pos.x <= px + 1) && (pos.y >= py - 1 && pos.y <= py + 1)) {
+    //     let eventImage = new Image();
+    //     eventImage.src = "./dice.png"; // 假設事件圖片是 `dice.png`
+    //     eventImage.onload = function () {
+    //       ctx.drawImage(eventImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
+    //     };
+    //   }
+    // });
+    // 重新繪製迷霧
+    // if (fogEnabled) {
+    //   // draw.applyFog();
+    //   player.updateFog(cellCoords.x, cellCoords.y);
+    // } else {
+    //   draw.clearFog();
+    // }
+    
+    // if (fogEnabled && player) {
+    //   draw.applyFog(); // 當勾選時，覆蓋整個迷宮
+    //   player.redrawPlayerFogMode(cellSize);
+    // } else {
+    //   draw.clearFog(); // 取消勾選時，清除所有迷霧
+    // }
+
+
     // 🔹 **設置回放狀態**
     isReplaying = true;
 
@@ -1211,9 +1269,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     console.log("Replaying path is", pathHistory); //test where first record is while replaying
     // ✅ 定義 `delay(ms)`，確保 `setTimeout` 被 Promise 解析
     function delay(ms) {
-      console.log(`⏳ 開始等待 ${ms}ms`);
+      // console.log(`⏳ 開始等待 ${ms}ms`);
       return new Promise(resolve => setTimeout(() => {
-      console.log(`✅ 延遲 ${ms}ms 完成`);
+      // console.log(`✅ 延遲 ${ms}ms 完成`);
       resolve();
     }, ms));
     }
@@ -1227,8 +1285,12 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
           return;
         }
 
-        let direction = pathHistory[index];
-        console.log(`🕹️ 移動方向: ${direction}`);
+        //origin setting
+        // let direction = pathHistory[index];
+        // console.log(`🕹️ 移動方向: ${direction}`);
+        let { direction, visionSize } = pathHistory[index]; // **恢复该步的视野大小**
+        player.visionSize = visionSize; // **动态调整视野**
+        console.log(`🎥 回放步骤: ${index + 1}/${pathHistory.length}, 方向: ${direction}, 视野大小: ${visionSize}`);
 
         movePlayer(
           direction === "left" ? -1 : direction === "right" ? 1 : 0,
