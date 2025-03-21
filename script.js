@@ -53,7 +53,7 @@ function toggleVisablity(id) {
 
 let fogEnabled = false; // 是否開啟迷霧
 let fogImage = new Image(); // 迷霧圖片
-fogImage.src = "./fog.jpg";
+fogImage.src = "./img/fog.jpg";
 
 // this.visionRadius = 1; // 預設玩家視野範圍（對應 3×3，之後可修改, 0為1*1，2為5*5以此類推）
 
@@ -324,7 +324,7 @@ function DrawMaze(Maze, ctx, cellsize, endSprite = null) {
     // 重新繪製事件
     if (draw.eventPositions.length > 0) {
       let diceImg = new Image();
-      diceImg.src = "./dice.png";
+      diceImg.src = "./img/dice.png";
       diceImg.onload = function () {
         // 使用已有的事件位置，而不是隨機生成
         draw.eventPositions.forEach(pos => {
@@ -471,7 +471,7 @@ window.onload = function () {
   };
   sprite = new Image();
   sprite.src =
-    "./key.png" +
+    "./img/key.png" +
     "?" +
     new Date().getTime();
   sprite.setAttribute("crossOrigin", " ");
@@ -483,7 +483,7 @@ window.onload = function () {
   };
 
   finishSprite = new Image();
-  finishSprite.src = "./home.png" +
+  finishSprite.src = "./img/home.png" +
     "?" +
     new Date().getTime();
   finishSprite.setAttribute("crossOrigin", " ");
@@ -711,7 +711,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) &&
         (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
         let eventImage = new Image();
-        eventImage.src = "./dice.png"; // 事件圖片
+        eventImage.src = "./img/dice.png"; // 事件圖片
         eventImage.onload = function () {
           ctx.drawImage(eventImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
         };
@@ -876,7 +876,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               draw.eventPositions.forEach(pos => {
                 if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) && (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
                   let eventImage = new Image();
-                  eventImage.src = "./dice.png"; // 假設事件圖片是 `dice.png`
+                  eventImage.src = "./img/dice.png"; // 假設事件圖片是 /img`dice.png`
                   eventImage.onload = function () {
                     ctx.drawImage(eventImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
                   };
@@ -940,7 +940,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 draw.eventPositions.forEach(pos => {
                   if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) && (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
                     let eventImage = new Image();
-                    eventImage.src = "./dice.png"; // 假設事件圖片是 `dice.png`
+                    eventImage.src = "./img/dice.png"; // 假設事件圖片是 /img`dice.png`
                     eventImage.onload = function () {
                       ctx.drawImage(eventImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
                     };
@@ -1039,7 +1039,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 // 重新繪製事件
                 if (draw.eventPositions.length > 0) {
                   let diceImg = new Image();
-                  diceImg.src = "./dice.png";
+                  diceImg.src = "./img/dice.png";
                   diceImg.onload = function () {
                     draw.eventPositions.forEach(pos => {
                       ctx.drawImage(diceImg, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
@@ -1407,7 +1407,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
       if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) &&
         (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
         let eventImage = new Image();
-        eventImage.src = "./dice.png"; // 事件圖片
+        eventImage.src = "./img/dice.png"; // 事件圖片
         eventImage.onload = function () {
           ctx.drawImage(eventImage, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
         };
@@ -1463,7 +1463,7 @@ document.getElementById("eventNum").addEventListener("change", function () {
 
     // 加載骰子圖並繪製新事件
     let diceImg = new Image();
-    diceImg.src = "./dice.png";
+    diceImg.src = "./img/dice.png";
     diceImg.onload = function () {
       draw.drawEvents(numEvents, diceImg);
 
@@ -1480,7 +1480,7 @@ document.getElementById("eventNum").addEventListener("change", function () {
         // 🔹 **重新繪製事件**
         if (draw.eventPositions.length > 0) {
           let diceImg = new Image();
-          diceImg.src = "./dice.png";
+          diceImg.src = "./img/dice.png";
           diceImg.onload = function () {
             draw.drawEvents(draw.eventPositions.length, diceImg);
           };
