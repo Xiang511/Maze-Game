@@ -769,9 +769,10 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
     player.removeSprite(cellCoords); // 移除當前座標的精靈圖片
     cellCoords = newCoords; // 更新座標
+    player.cellCoords = cellCoords; // 🔹 更新 cellCoords
     drawSprite(cellCoords); // 繪製新座標的精靈圖片
 
-    // console.log("✅ 更新座標: ", cellCoords); // 確認 cellCoords 是否真的改變
+    console.log("✅ 更新座標: ", cellCoords); // 確認 cellCoords 是否真的改變
 
     // // **強制刷新畫面，以防沒有更新**
     // setTimeout(() => drawSprite(cellCoords), 0);
@@ -875,6 +876,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               // 🔹 **繪製視野內的事件**
               draw.eventPositions.forEach(pos => {
                 if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) && (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
+                  console.log("draw event(general_Vision):", player.visionSize);
                   let eventImage = new Image();
                   eventImage.src = "./img/dice.png"; // 假設事件圖片是 /img`dice.png`
                   eventImage.onload = function () {
@@ -939,6 +941,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 // 🔹 **繪製視野內的事件**
                 draw.eventPositions.forEach(pos => {
                   if ((pos.x >= px - player.visionSize && pos.x <= px + player.visionSize) && (pos.y >= py - player.visionSize && pos.y <= py + player.visionSize)) {
+                    console.log("draw event(Enhanced_Vision):", player.visionSize);
                     let eventImage = new Image();
                     eventImage.src = "./img/dice.png"; // 假設事件圖片是 /img`dice.png`
                     eventImage.onload = function () {
@@ -970,7 +973,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                   ctx.fillRect(pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
 
                   let cloudImg = new Image();
-                  cloudImg.src = "./fog.jpg";
+                  cloudImg.src = "./img/fog.jpg";
                   cloudImg.onload = function () {
                     ctx.drawImage(cloudImg, pos.x * cellSize, pos.y * cellSize, cellSize, cellSize);
                   };
@@ -1024,6 +1027,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
               console.log("📌 玩家傳送前座標:", cellCoords);
               player.removeSprite(player.cellCoords);
               cellCoords = { ...maze.startCoord() }; // **設定玩家為起點座標**
+              player.cellCoords = cellCoords; // 🔹 更新 cellCoords
               console.log("📌 玩家傳送後座標:", cellCoords);
               // 把玩家傳送到起點
               if (player) {
@@ -1038,6 +1042,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
 
                 // 重新繪製事件
                 if (draw.eventPositions.length > 0) {
+                  console.log("draw event(Restricted_Vision):", player.visionSize);
                   let diceImg = new Image();
                   diceImg.src = "./img/dice.png";
                   diceImg.onload = function () {
@@ -1083,9 +1088,9 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                 recordPath = true;
               }
               // 重新繪製迷霧
-              if (fogEnabled) {
-                draw.applyFog();
-              }
+              // if (fogEnabled) {
+              //   draw.applyFog();
+              // }
               isReplaying = false;
               // 重新繪製玩家
               drawSprite(cellCoords);
@@ -1114,13 +1119,14 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                   previousCoords = { ...currentPlayerPosition };
                   console.log("keyPressCount:", keyPressCount);
                 }
-                if (keyPressCount <= 3) {
+                if (keyPressCount < 3) {
                   Enhanced_Vision();
 
                 } else {
-                  player.visionSize = 1; // normal vision
-                  console.log("👀 視野正學！當前視野大小:", player.visionSize);
                   default_action();
+                  player.visionSize = 1; // normal vision
+                  console.log("👀 視野正常！當前視野大小:", player.visionSize);
+                  
                   window.removeEventListener("keydown", incrementKeyPressCount); // 移除事件監聽器
                 }
               }
@@ -1148,7 +1154,7 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
                   previousCoords = { ...currentPlayerPosition };
                   console.log("keyPressCount:", keyPressCount);
                 }
-                if (keyPressCount <= 5) {
+                if (keyPressCount < 5) {
                   ChangePicture();
                   Restricted_Vision();
                 } else {
@@ -1430,9 +1436,10 @@ function Player(maze, c, _cellsize, onComplete, sprite = null) {
     recordPath = enable;
     // console.log("📌 `toggleRecord()` 內 `recordPath` 狀態:", recordPath);
     // console.log("pathHistory:", pathHistory); //test where first record is
+    console.log("player postition:", player.cellCoords);
     if (enable) {
       // if (!fixedRecordPoint) {
-      //   fixedRecordPoint = { ...player.cellCoords };  // **如果沒有記錄點，則設定當前位置**
+      //   fixedRecordPoint = player.getCellCoords();  // **如果沒有記錄點，則設定當前位置**
       // }
       fixedRecordPoint = { ...player.cellCoords }; // **強制設定記錄點為當前位置**
       console.log("✅ 開啟記錄模式，起始位置:", fixedRecordPoint);
