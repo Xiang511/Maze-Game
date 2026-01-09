@@ -72,7 +72,7 @@ This is a maze generation game using the depth first search algorithm.
   </td> 
     
   <td align="center">
-    <a href="https://github.com/a0979551728"  style="display:inline-block;width:110px"><img src="https://avatars.githubusercontent.com/u/182858325?v=4" width="88px;" alt="a0979551728"/><br/><sub><b>AlbertLi-221</b></sub></a><br/>
+    <a href="https://github.com/AlbertLi-221"  style="display:inline-block;width:110px"><img src="https://avatars.githubusercontent.com/u/182858325?v=4" width="88px;" alt="a0979551728"/><br/><sub><b>AlbertLi-221</b></sub></a><br/>
   </td>
     
   </tr>
